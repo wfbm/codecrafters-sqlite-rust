@@ -19,10 +19,15 @@ fn main() -> Result<()> {
             let mut header = [0; 100];
             file.read_exact(&mut header)?;
 
-            // The page size is stored at the 16th byte offset, using 2 bytes in big-endian order
-            #[allow(unused_variables)]
             let page_size = u16::from_be_bytes([header[16], header[17]]);
             println!("database page size: {}", page_size);
+
+            let mut first_page = vec![0; page_size as usize];
+
+            file.read_exact(&mut first_page)?;
+            let table_count = u16::from_be_bytes([first_page[3], first_page[4]]);
+
+            println!("number of tables: {}", table_count);
         }
         _ => bail!("Missing or invalid command passed: {}", command),
     }
